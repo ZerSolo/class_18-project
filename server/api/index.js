@@ -26,27 +26,27 @@ apiRouter
         res.json(fakeDB);
     })
     .post((req, res) => {
-        if (!Array.isArray(req.body)) {
-            res.status(400).json({ error: 'Data should be an array' });
+        let { price, desc } = req.body;
+        if (typeof price === 'undefined') {
+            res.status(400).json({
+                error: `price field is required`,
+            });
         }
-        console.log(req.body);
-        res.json({ ok: 1 });
-        // let { price } = req.body;
-        // if (typeof price === 'undefined') {
-        //     res.status(400).end('price field is required');
-        // }
-        // price = parseInt(price, 10);
-        // res.status(400).end('price should be a positive number');
-        // if (Number.isNaN(price) || price <= 0) {
-        // } else {
-        //     lastId++;
-        //     const newItem = {
-        //         id: lastId,
-        //         price,
-        //     };
-        //     fakeDB.push(newItem);
-        //     res.json(newItem);
-        // }
+        price = parseInt(price, 10);
+        if (Number.isNaN(price) || price <= 0) {
+            res.status(400).json({
+                error: `price should be a positive number`,
+            });
+        } else {
+            lastId++;
+            const newItem = {
+                id: lastId,
+                price,
+                desc,
+            };
+            fakeDB.push(newItem);
+            res.json(newItem);
+        }
     });
 
 apiRouter
@@ -70,7 +70,6 @@ apiRouter
         const index = fakeDB.findIndex(house => {
             return house.id === parseInt(id, 10);
         });
-        console.log(index, fakeDB[index]);
         if (index > -1) {
             fakeDB.splice(index, 1);
             res.send(`the house with the id: ${id} is deleted`);

@@ -4,7 +4,6 @@ const express = require('express'); // Loading in Express functionality
 const bodyParser = require('body-parser');
 const apiRouter = require('./api'); // Loading in our custom index.js from /api (it will automatically look for index.js)
 const app = express(); // Creating an Express instance
-//app.use(express.static(path.join(__dirname, 'public')));
 
 const path = require('path');
 const cors = require('cors');
