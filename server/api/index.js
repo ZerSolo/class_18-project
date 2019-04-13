@@ -1,60 +1,86 @@
 // Purpose of file: To contain all our routes and necessary logic
+const { promisify } = require('util');
 
 const apiRouter = require('express').Router();
-let lastId = 3;
-const fakeDB = [
-    {
-        id: 1,
-        price: 135000,
-        desc: 'villa 3 rooms',
-    },
-    {
-        id: 2,
-        price: 150050,
-        desc: 'studio with 1 room',
-    },
-    {
-        id: 3,
-        price: 1789000,
-        desc: 'apartment  with 2 rooms',
-    },
-];
+const db = require('../db');
+const { validateHouse, houseAsSqlParams } = require('../validateHouse');
+db.queryPromise = promisify(db.query);
+const addHousesSql = `
+  replace into houses (
+    link,
+    location_country,
+    location_city,
+    size_rooms,
+    price_value,
+    price_currency
+  )values ?;
+  `;
 
 apiRouter
     .route('/houses')
-    .get((req, res) => {
-        res.json(fakeDB);
-    })
-    .post((req, res) => {
-        let { price, desc } = req.body;
-        if (typeof price === 'undefined') {
-            res.status(400).json({
-                error: `price field is required`,
-            });
+    .get(async (req, res) => {
+        try {
+            const houses = await db.queryPromise('select * from houses;');
+            console.log('this is data from client', houses);
+            res.json(houses);
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ error: error.message });
         }
-        price = parseInt(price, 10);
-        if (Number.isNaN(price) || price <= 0) {
-            res.status(400).json({
-                error: `price should be a positive number`,
-            });
+    })
+
+    // post
+
+    .post(async (req, res) => {
+        const inputArrayData = req.body;
+        if (!Array.isArray(inputArrayData)) {
+            return res.status(400).send({ error: 'data should be an array' });
+        }
+        const processedData = inputArrayData.map(houseObj => {
+            return validateHouse(houseObj);
+        });
+
+        //console.log(processedData);
+        const validData = [];
+        const invalidData = [];
+        processedData.forEach(element => {
+            if (element.valid) {
+                validData.push(element);
+            } else {
+                invalidData.push(element);
+            }
+        });
+        const report = {
+            valid: validData.length,
+            invalid: invalidData.length,
+            invalidData: invalidData,
+        };
+        if (validData.length) {
+            try {
+                //  db.connect();
+                const housesData = validData.map(el =>
+                    houseAsSqlParams(el.raw)
+                );
+                console.log('valid datas', housesData);
+                await db.queryPromise(addHousesSql, [housesData]);
+
+                //db.end();
+                return res.json(report);
+            } catch (error) {
+                //console.log('my error', error);
+                return res.status(500).json({ error: error.message });
+            }
         } else {
-            lastId++;
-            const newItem = {
-                id: lastId,
-                price,
-                desc,
-            };
-            fakeDB.push(newItem);
-            res.json(newItem);
+            res.json(report);
         }
     });
 
 apiRouter
     .route('/houses/:id')
-    .get((req, res) => {
+    .get(async (req, res) => {
         const { id } = req.params;
-
-        const item = fakeDB.find(house => {
+        const houses = await db.queryPromise('select * from houses;');
+        const item = houses.find(house => {
             return house.id === parseInt(id, 10);
         });
         if (item) {
@@ -65,13 +91,14 @@ apiRouter
             });
         }
     })
-    .delete((req, res) => {
+    .delete(async (req, res) => {
         const { id } = req.params;
-        const index = fakeDB.findIndex(house => {
+        const houses = await db.queryPromise('select * from houses;');
+        const index = houses.findIndex(house => {
             return house.id === parseInt(id, 10);
         });
         if (index > -1) {
-            fakeDB.splice(index, 1);
+            houses.splice(index, 1);
             res.send(`the house with the id: ${id} is deleted`);
         } else {
             res.send(`the house with the given id: ${id} not found`);

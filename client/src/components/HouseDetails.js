@@ -18,6 +18,7 @@ class House extends Component {
         fetch(`/api/houses/${id}`)
             .then(res => res.json())
             .then(houseData => {
+                console.log('House details', houseData);
                 this.setState({
                     houseDetails: houseData,
                     error: houseData.error,
@@ -46,11 +47,16 @@ class House extends Component {
         } else {
             return (
                 <div>
-                    id :{houseDetails.id} <br />
-                    price: {houseDetails.price}
-                    <br />
-                    Description:{houseDetails.desc}
-                    <br />
+                    <ul className="houseDetails">
+                        {Object.entries(houseDetails).map(houseInfo => {
+                            return (
+                                <li className="houseInfo">
+                                    {houseInfo[0]}
+                                    {':'} {houseInfo[1]}
+                                </li>
+                            );
+                        })}
+                    </ul>
                 </div>
             );
         }

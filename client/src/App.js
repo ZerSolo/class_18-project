@@ -5,12 +5,12 @@ import { Link, Route, Switch } from 'react-router-dom';
 import HousesList from './components/HouseList';
 
 import House from './components/HouseDetails';
-import AddHouse from './components/AddHouse';
+import AddHouse from './components/AddHouseFull';
 class App extends Component {
     render() {
         return (
             <div className="App">
-                <ul>
+                <ul className="menu">
                     <li>
                         <Link to="/"> Home </Link>
                     </li>
@@ -18,11 +18,11 @@ class App extends Component {
                         <Link to="/houses">Houses </Link>
                     </li>
                     <li>
-                        <Link to="/contribute/add">Add Your house </Link>
+                        <Link to="/contribute/add">Contribute </Link>
                     </li>
                 </ul>
                 <Switch>
-                    <Route exact path="/" render={() => <div> Home</div>} />
+                    <Route exact path="/" render={() => <div>HOME</div>} />
                     <Route exact path="/houses" component={HousesList} />
                     <Route exact path="/houses/:id" component={House} />
                     <Route exact path="/contribute/add" component={AddHouse} />
