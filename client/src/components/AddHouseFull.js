@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../App.css';
+import '../App.sass';
 const Report = ({ report }) => (
     <div className="report">
         reporting valid houses :{report.valid} <br />

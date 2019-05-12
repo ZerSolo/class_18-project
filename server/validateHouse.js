@@ -1,6 +1,6 @@
 const validator = require('validator');
 const { getCode } = require('country-list');
-console.log(getCode('kenya'));
+
 const requiredFields = [
     'link',
     'location_country',

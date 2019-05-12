@@ -18,7 +18,7 @@ class House extends Component {
         fetch(`/api/houses/${id}`)
             .then(res => res.json())
             .then(houseData => {
-                console.log('House details', houseData);
+                console.log('AT House details', houseData);
                 this.setState({
                     houseDetails: houseData,
                     error: houseData.error,
